@@ -1,0 +1,19 @@
+# data
+
+data/raw/*
+data/processed/*
+!data/sample/
+
+# python
+__pycache__/
+*.pyc
+.venv/
+.env
+
+#notebooks
+.ipynb_checkpoints/
+
+
+#models
+models/*.pk1
+models/*.joblib

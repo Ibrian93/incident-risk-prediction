@@ -1,0 +1,9 @@
+pandas
+duckdb
+requests
+jupyter
+ipykernel
+matplotlib
+plotly
+scikit-learn
+python-dotenv
