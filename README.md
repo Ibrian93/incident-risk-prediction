@@ -21,3 +21,21 @@ This project is part of my transition from Data Engineering / Analytics Engineer
 I used AI assistance during the initial setup phase to speed up boilerplate tasks such as project structure, ingestion scripts and debugging. However, the project decisions, data validation, modelling choices, analysis, interpretation and final conclusions are developed and reviewed by me.
 
 The purpose of this repository is not only to build a model, but to demonstrate an end-to-end analytical workflow: data ingestion, data quality checks, SQL transformations, feature engineering, model evaluation and business-facing communication.
+
+## Current Progress
+
+### Day 1 — Data Ingestion
+
+- Downloaded public OSHA Severe Injury Report data
+- Loaded raw CSV data into DuckDB
+- Created raw, staging and feature tables
+- Fixed date parsing issue using `STRPTIME(EventDate, '%m/%d/%Y')`
+- Defined initial binary ML target: `high_severity_outcome`
+
+### Day 2 — Exploratory Data Analysis
+
+- Generated initial EDA summary tables
+- Analysed target distribution
+- Analysed cases by year, state, event type, body part and source
+- Created initial visualizations
+- Documented data quality notes and modelling implications
