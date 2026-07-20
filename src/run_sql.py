@@ -7,6 +7,7 @@ DUCKDB_PATH = Path("data/processed/safety.duckdb")
 SQL_FILES = [
     Path("sql/01_raw_to_staging.sql"),
     Path("sql/02_feature_table.sql"),
+    Path("sql/03_model_features.sql"),
 ]
 
 
