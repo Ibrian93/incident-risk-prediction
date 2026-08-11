@@ -99,3 +99,41 @@ The goal is to keep ingestion, transformation, analytics and machine learning re
 * matplotlib
 
 Additional ML Engineering tools will be introduced as the project progress
+
+
+## Current Data Models
+
+The current transformation flow is:
+
+* raw_severe_injuries
+* stg_severe_injuries
+* fct_injury_cases
+* ml_injury_features
+
+### `raw_severe_injuries`
+Raw OSHA data loaded into DuckDB with minimal modification.
+
+### `stg_severe_injuries`
+Cleans and standardizes the source data, including:
+* column naming
+* date parsing
+* data type conversion
+* null handling
+* standardized injury attributes
+
+### `fct_injury_cases`
+Represents reported severe injury cases and introduces analytical attributes such as:
+* event year
+* event month
+* day of week
+* NAICS industry levels
+* injury outcome measures
+* initial ML target
+
+The intended grain is:
+One row per OSHA severe injury report
+
+
+### `ml_injury_features`
+Provides a consumer-specific dataset for machine learning.
+This layer contains the candidate features and target used during model development and is kept separate from the analytical models so that ML-specific transformations can evolve independently. 
