@@ -53,6 +53,7 @@ python src/download_data.py
 
 The project currently follows an ELT workflow.
 
+```
 OSHA Severe Injury Reports
           │
           ▼
@@ -77,7 +78,7 @@ OSHA Severe Injury Reports
           │
           ▼
     Model development
-
+```
 
 This architecture will evolve as additional ML engineering components are introduced.
 
@@ -164,7 +165,7 @@ The focus of this stage is to turn the initial SQL transformations into a struct
 
 ## ML Engineering Roadmap
 The planned workflow is:
-
+```
 Data ingestion
       ↓
 Data validation
@@ -188,7 +189,7 @@ Model packaging
 Inference API
       ↓
 Containerized deployment
-
+```
 
 The goal is not only to train a model but to understand and implement the engineering lifecycle around it. 
 
@@ -198,3 +199,29 @@ For example, the OSHA dataset contains a free-text injury narrative. Since the n
 For this reason, text-based features will initially be excluded from the baseline model and evaluated separately later in the project.
 
 
+## Repository Structure
+The repository is being reorganized as the project evolves. The intended structure is:
+```
+├── data/
+│   ├── raw/
+│   └── processed/
+│
+├── src/
+│   ├── ingestion/
+│   ├── training/
+│   └── inference/
+│
+├── dbt/
+│   └── models/
+│       ├── staging/
+│       ├── intermediate/
+│       ├── marts/
+│       └── ml/
+│
+├── notebooks/
+│
+├── tests/
+│
+├── README.md
+└── requirements.txt
+```
