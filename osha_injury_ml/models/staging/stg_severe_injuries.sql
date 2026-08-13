@@ -1,0 +1,27 @@
+select
+    cast(ID as varchar) as incident_id,
+    cast(try_strptime(EventDate, '%m/%d/%Y') as date) as event_date,
+    Employer as employer,
+    City as city,
+    State as state,
+    Zip as zip_code,
+    Latitude as latitude,
+    Longitude as longitude,
+    cast("Primary NAICS" as varchar) as primary_naics,
+    coalesce(Hospitalized, 0) as hospitalized_count,
+    coalesce(Amputation, 0) as amputation_count,
+    coalesce("Loss of Eye", 0) as loss_of_eye_count,
+    "Final Narrative" as final_narrative,
+    Nature as nature_code,
+    NatureTitle as nature_title,
+    "Part of Body" as body_part_code,
+    "Part of Body Title" as body_part_title,
+    Event as event_code,
+    EventTitle as event_title,
+    Source as source_code,
+    SourceTitle as source_title,
+    "Secondary Source" as secondary_source_code,
+    "Secondary Source Title" as secondary_source_title,
+    FederalState as federal_state_flag
+
+from {{ source('osha', 'raw_severe_injuries') }}
