@@ -20,3 +20,5 @@ models/*.joblib
 
 # Windows downloaded file metadata
 *:Zone.Identifier
+
+.vscode/

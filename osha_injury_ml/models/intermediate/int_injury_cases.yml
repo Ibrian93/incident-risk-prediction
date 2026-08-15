@@ -1,0 +1,28 @@
+version: 2
+
+models:
+  - name: int_injury_cases
+    description: >
+      Reusable representation of OSHA severe injury reports enriched
+      with derived temporal, industry and injury outcome attributes.
+
+    columns:
+      - name: incident_id
+        description: Identifier provided by the OSHA source.
+        data_tests:
+          - not_null
+
+      - name: event_date
+        description: Date when the reported injury occurred.
+        data_tests:
+          - not_null
+
+      - name: high_severity_outcome
+        description: >
+          Binary modelling target. 1 indicates that the reported case
+          involved an amputation or loss of an eye; otherwise 0.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [0, 1]

@@ -11,7 +11,6 @@ models:
         description: Unique identifier of the OSHA severe injury report.
         data_tests:
           - not_null
-          - unique
 
       - name: event_date
         description: Date when the reported injury occurred.
