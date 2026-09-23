@@ -17,3 +17,6 @@ __pycache__/
 #models
 models/*.pk1
 models/*.joblib
+
+# Windows downloaded file metadata
+*:Zone.Identifier
