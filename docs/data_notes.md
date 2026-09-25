@@ -1,0 +1,1 @@
+- During ingestion, the original EventDate column used M/D/YYYY format. DuckDB did not parse this reliably with a simple TRY_CAST, so I used STRPTIME(EventDate, '%m/%d/%Y') to explicitly parse the source format.
