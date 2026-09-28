@@ -12,3 +12,12 @@ The raw data is not committed to this repository. Instead, it can be downloaded 
 
 ```bash
 python src/download_data.py
+```
+
+## Development Note
+
+This project is part of my transition from Data Engineering / Analytics Engineering into Applied Data Science.
+
+I used AI assistance during the initial setup phase to speed up boilerplate tasks such as project structure, ingestion scripts and debugging. However, the project decisions, data validation, modelling choices, analysis, interpretation and final conclusions are developed and reviewed by me.
+
+The purpose of this repository is not only to build a model, but to demonstrate an end-to-end analytical workflow: data ingestion, data quality checks, SQL transformations, feature engineering, model evaluation and business-facing communication.
