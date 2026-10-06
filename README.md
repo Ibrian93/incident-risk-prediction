@@ -1,41 +1,101 @@
-# Workplace Severe Injury Risk Intelligence
+# Workplace Severe Injury Intelligence
 
-This project builds an end-to-end data science pipeline using public OSHA Severe Injury Report data.
+An end-to-end Data and Machine Learning Engineering project built with public OSHA Severe Injury Report data.
 
-The objective is to transform public workplace injury reports into an analytical dataset that can support safety risk exploration, severity classification, and business-facing dashboards.
+I chose this dataset because it is closely related to a domain I have worked with professionally. During my time in Roche's Global SHE (Safety, Health and Environment) organization, I contributed to data products used for safety reporting and decision-making.
+
+This project gives me the opportunity to work with a familiar business domain while building the complete technical workflow myself: from raw data ingestion and data quality to analytical modelling, machine learning and, eventually, model deployment.
+
+The project is being developed incrementally, with each stage documented as I build it.
+
+---
+
+## Project Objective
+
+The dataset contains severe workplace injuries reported to OSHA.
+
+Because the dataset already represents severe injury cases, the initial machine learning problem is **not** to predict whether an arbitrary workplace incident will become severe.
+
+Instead, the first modelling objective is to classify the outcome of an already reported severe injury.
+
+The current binary target is:
+
+- `1` — the case involved an amputation or loss of an eye
+- `0` — the reported severe injury did not contain either of those outcomes
+
+This target may evolve as the project develops and the data is better understood.
+
+Beyond model performance, the project focuses on building a reproducible data and ML workflow that could realistically support a production system.
+
+---
 
 ## Data Source
 
-The dataset comes from OSHA Severe Injury Reports. OSHA requires employers to report severe work-related injuries such as amputations, in-patient hospitalizations, or loss of an eye. The reporting requirement began on January 1, 2015.
+The project uses the public [OSHA Severe Injury Report](https://www.osha.gov/severeinjury) dataset.
 
-The raw data is not committed to this repository. Instead, it can be downloaded from OSHA using:
+OSHA requires employers to report certain severe work-related injuries, including:
+
+- in-patient hospitalizations
+- amputations
+- loss of an eye
+
+The reporting requirement began on January 1, 2015.
+
+The raw dataset is not committed to this repository.
+
+It can be downloaded directly from OSHA by running:
 
 ```bash
 python src/download_data.py
 ```
 
-## Development Note
+## Current Architecture
 
-This project is part of my transition from Data Engineering / Analytics Engineering into Applied Data Science.
+The project currently follows an ELT workflow.
 
-I used AI assistance during the initial setup phase to speed up boilerplate tasks such as project structure, ingestion scripts and debugging. However, the project decisions, data validation, modelling choices, analysis, interpretation and final conclusions are developed and reviewed by me.
+OSHA Severe Injury Reports
+          │
+          ▼
+     Raw CSV data
+          │
+          ▼
+        DuckDB
+          │
+          ▼
+      Raw layer
+          │
+          ▼
+     Staging layer
+          │
+          ▼
+   Analytical models
+          │
+          ├──────────────► Exploratory analysis
+          │
+          ▼
+    ML feature dataset
+          │
+          ▼
+    Model development
 
-The purpose of this repository is not only to build a model, but to demonstrate an end-to-end analytical workflow: data ingestion, data quality checks, SQL transformations, feature engineering, model evaluation and business-facing communication.
 
-## Current Progress
+This architecture will evolve as additional ML engineering components are introduced.
 
-### Day 1 — Data Ingestion
+The goal is to keep ingestion, transformation, analytics and machine learning responsabilities separated instead of building the entire workflow inside a single notebook.
 
-- Downloaded public OSHA Severe Injury Report data
-- Loaded raw CSV data into DuckDB
-- Created raw, staging and feature tables
-- Fixed date parsing issue using `STRPTIME(EventDate, '%m/%d/%Y')`
-- Defined initial binary ML target: `high_severity_outcome`
 
-### Day 2 — Exploratory Data Analysis
+## Technology Stack
 
-- Generated initial EDA summary tables
-- Analysed target distribution
-- Analysed cases by year, state, event type, body part and source
-- Created initial visualizations
-- Documented data quality notes and modelling implications
+### Data Engineering 
+* Python
+* SQL
+* DuckDB
+* dbt
+    
+### Data Analysis & Machine Learning
+* Python
+* Pandas
+* scikit-learn
+* matplotlib
+
+Additional ML Engineering tools will be introduced as the project progress
