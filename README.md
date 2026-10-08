@@ -137,3 +137,28 @@ One row per OSHA severe injury report
 ### `ml_injury_features`
 Provides a consumer-specific dataset for machine learning.
 This layer contains the candidate features and target used during model development and is kept separate from the analytical models so that ML-specific transformations can evolve independently. 
+
+
+## Project Progress
+
+## Day 1 - Data Ingestion
+
+* Downloaded the public OSHA Severe Injury Report dataset
+* Loaded the raw CSV data into DuckDB
+* Created the intial raw and staging tables
+* Resolved date parsing issues in the source data
+* Defined the first binary ML target: `high_severity_outcome`
+
+## Day 2 - Exploratory Data Analysis
+* Analysed the target distribution
+* Explored injury cases per year and state
+* Analysed event types, body parts and injury sources
+* Created initial visualisation
+* Identified data quality issues
+* Documented potential modelling considerations
+
+## Day 3 - Data Modelling * Quality
+In progress.
+
+The focus of this stage is to turn the initial SQL transformations into a structured and testable data modelling workflow before model training begins.
+
