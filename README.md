@@ -162,3 +162,32 @@ In progress.
 
 The focus of this stage is to turn the initial SQL transformations into a structured and testable data modelling workflow before model training begins.
 
+## ML Engineering Roadmap
+The planned workflow is:
+
+Data ingestion
+      ↓
+Data validation
+      ↓
+Data transformation
+      ↓
+ML feature dataset
+      ↓
+Baseline model
+      ↓
+Feature engineering
+      ↓
+Model comparison
+      ↓
+Model evaluation
+      ↓
+Experiment tracking
+      ↓
+Model packaging
+      ↓
+Inference API
+      ↓
+Containerized deployment
+
+
+The goal is not only to train a model but to understand and implement the engineering lifecycle around it. 
