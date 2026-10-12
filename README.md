@@ -191,3 +191,10 @@ Containerized deployment
 
 
 The goal is not only to train a model but to understand and implement the engineering lifecycle around it. 
+
+## Modelling Considerations
+One important part of this project is identifying situations where apparently useful features could produce misleading model performance
+For example, the OSHA dataset contains a free-text injury narrative. Since the narrative may explicitly describe the final injury outcome, using it directly could introduce target leakage.
+For this reason, text-based features will initially be excluded from the baseline model and evaluated separately later in the project.
+
+
