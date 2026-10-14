@@ -225,3 +225,8 @@ The repository is being reorganized as the project evolves. The intended structu
 ├── README.md
 └── requirements.txt
 ```
+
+## Why I am building This
+
+My professional background is primarily in data and analytics engineering, while my academic background in Mathematics and computational engineering included machine learning, optimization and numerical methods.
+I am building this project to connect those two areas: using the data engineering practices I have worked with profesionally while developing stronger hands-on experience with the machine learning lifecycle.
