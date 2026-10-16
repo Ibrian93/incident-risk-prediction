@@ -1,12 +1,14 @@
 # Workplace Severe Injury Intelligence
 
-An end-to-end Data and Machine Learning Engineering project built with public OSHA Severe Injury Report data.
+An end-to-end Data and Machine Learning Engineering project built using public OSHA Severe Injury Report data.
 
-I chose this dataset because it is closely related to a domain I have worked with professionally. During my time in Roche's Global SHE (Safety, Health and Environment) organization, I contributed to data products used for safety reporting and decision-making.
+I chose this dataset because the domain is closely related to my previous professional experience. During my time at Roche, I worked within Global SHE (Safety, Health and Environment), where I contributed to data products used for safety reporting and decision-making.
 
-This project gives me the opportunity to work with a familiar business domain while building the complete technical workflow myself: from raw data ingestion and data quality to analytical modelling, machine learning and, eventually, model deployment.
+With this project, I want to combine that domain knowledge with my background in Data Engineering and my academic experience in Machine Learning.
 
-The project is being developed incrementally, with each stage documented as I build it.
+The goal is to build the complete workflow myself — from raw data ingestion and transformation to model training, evaluation and, eventually, deployment.
+
+The project is being developed incrementally, and I am documenting the main technical and modelling decisions as I progress.
 
 ---
 
@@ -14,18 +16,18 @@ The project is being developed incrementally, with each stage documented as I bu
 
 The dataset contains severe workplace injuries reported to OSHA.
 
-Because the dataset already represents severe injury cases, the initial machine learning problem is **not** to predict whether an arbitrary workplace incident will become severe.
+Because every record in the dataset already represents a severe injury, the initial Machine Learning problem is **not** to predict whether an arbitrary workplace incident will become severe.
 
-Instead, the first modelling objective is to classify the outcome of an already reported severe injury.
+Instead, the first modelling task is a binary classification problem over reported severe injury cases.
 
-The current binary target is:
+The initial target is:
 
-- `1` — the case involved an amputation or loss of an eye
-- `0` — the reported severe injury did not contain either of those outcomes
+- `1` — the reported case involved an amputation or loss of an eye
+- `0` — the reported case did not contain either of those outcomes
 
-This target may evolve as the project develops and the data is better understood.
+This definition may evolve as I learn more about the dataset and evaluate the modelling problem.
 
-Beyond model performance, the project focuses on building a reproducible data and ML workflow that could realistically support a production system.
+Beyond model performance, the main objective is to build a reproducible workflow around the data and the model rather than limiting the project to experimentation inside a notebook.
 
 ---
 
@@ -39,199 +41,228 @@ OSHA requires employers to report certain severe work-related injuries, includin
 - amputations
 - loss of an eye
 
-The reporting requirement began on January 1, 2015.
+The reporting requirement started on January 1, 2015.
 
-The raw dataset is not committed to this repository.
-
-It can be downloaded directly from OSHA by running:
+The raw dataset is not committed to this repository. It can be downloaded directly from OSHA by running:
 
 ```bash
 python src/download_data.py
 ```
 
-## Current Architecture
+---
 
-The project currently follows an ELT workflow.
+## Current Data Pipeline
 
-```
-OSHA Severe Injury Reports
-          │
-          ▼
-     Raw CSV data
-          │
-          ▼
-        DuckDB
-          │
-          ▼
-      Raw layer
-          │
-          ▼
-     Staging layer
-          │
-          ▼
-   Analytical models
-          │
-          ├──────────────► Exploratory analysis
-          │
-          ▼
-    ML feature dataset
-          │
-          ▼
-    Model development
+The current implementation follows an ELT approach.
+
+```mermaid
+flowchart TD
+    A[OSHA Severe Injury Reports] --> B[Raw CSV]
+    B --> C[(DuckDB)]
+    C --> D[raw_severe_injuries]
+    D --> E[stg_severe_injuries]
+    E --> F[fct_injury_cases]
+    F --> G[Exploratory Analysis]
+    F --> H[ml_injury_features]
+    H --> I[Machine Learning]
 ```
 
-This architecture will evolve as additional ML engineering components are introduced.
+The initial SQL transformations will be reorganized during Day 3 into a more structured and testable dbt workflow.
 
-The goal is to keep ingestion, transformation, analytics and machine learning responsabilities separated instead of building the entire workflow inside a single notebook.
+The aim is to keep ingestion, transformation, analytics and Machine Learning responsibilities separated rather than placing the entire workflow inside a single notebook.
 
-
-## Technology Stack
-
-### Data Engineering 
-* Python
-* SQL
-* DuckDB
-* dbt
-    
-### Data Analysis & Machine Learning
-* Python
-* Pandas
-* scikit-learn
-* matplotlib
-
-Additional ML Engineering tools will be introduced as the project progress
-
+---
 
 ## Current Data Models
 
-The current transformation flow is:
-
-* raw_severe_injuries
-* stg_severe_injuries
-* fct_injury_cases
-* ml_injury_features
-
 ### `raw_severe_injuries`
-Raw OSHA data loaded into DuckDB with minimal modification.
+
+Contains the OSHA source data loaded into DuckDB with minimal modification.
 
 ### `stg_severe_injuries`
-Cleans and standardizes the source data, including:
-* column naming
-* date parsing
-* data type conversion
-* null handling
-* standardized injury attributes
+
+Applies source-level cleaning and standardisation, including:
+
+- column naming
+- date parsing
+- data type conversion
+- null handling
+- standardisation of source values
 
 ### `fct_injury_cases`
-Represents reported severe injury cases and introduces analytical attributes such as:
-* event year
-* event month
-* day of week
-* NAICS industry levels
-* injury outcome measures
-* initial ML target
 
-The intended grain is:
-One row per OSHA severe injury report
+Represents individual OSHA severe injury reports and introduces analytical attributes such as:
 
+- event year
+- event month
+- day of week
+- NAICS industry levels
+- injury outcome measures
+- the initial Machine Learning target
+
+**Current grain**
+
+> One row represents one OSHA Severe Injury Report.
 
 ### `ml_injury_features`
-Provides a consumer-specific dataset for machine learning.
-This layer contains the candidate features and target used during model development and is kept separate from the analytical models so that ML-specific transformations can evolve independently. 
 
+Contains candidate features used for Machine Learning experiments.
+
+Keeping this dataset separate from the analytical models allows ML-specific transformations to evolve without changing the reusable data models upstream.
+
+---
+
+## Technology Stack
+
+### Currently Used
+
+**Data Engineering**
+- Python
+- SQL
+- DuckDB
+
+**Data Analysis & Machine Learning**
+- pandas
+- scikit-learn
+- matplotlib
+
+**Development**
+- Git
+- GitHub
+
+### Being Introduced
+
+- dbt
+- automated data quality tests
+
+### Planned ML Engineering Components
+
+- MLflow
+- FastAPI
+- Docker
+- automated testing
+- CI/CD
+
+Additional tools will only be added where they have a clear purpose in the project.
+
+---
 
 ## Project Progress
 
-## Day 1 - Data Ingestion
+### Day 1 — Data Ingestion ✅
 
-* Downloaded the public OSHA Severe Injury Report dataset
-* Loaded the raw CSV data into DuckDB
-* Created the intial raw and staging tables
-* Resolved date parsing issues in the source data
-* Defined the first binary ML target: `high_severity_outcome`
+- Downloaded the public OSHA Severe Injury Report dataset
+- Loaded the raw CSV data into DuckDB
+- Created the initial raw and staging tables
+- Resolved source date parsing issues
+- Defined the first binary target: `high_severity_outcome`
 
-## Day 2 - Exploratory Data Analysis
-* Analysed the target distribution
-* Explored injury cases per year and state
-* Analysed event types, body parts and injury sources
-* Created initial visualisation
-* Identified data quality issues
-* Documented potential modelling considerations
+### Day 2 — Exploratory Data Analysis ✅
 
-## Day 3 - Data Modelling * Quality
+- Analysed the target distribution
+- Explored injury cases by year and state
+- Analysed event types, body parts and injury sources
+- Created initial visualisations
+- Identified data quality issues
+- Documented potential modelling considerations
+
+### Day 3 — Data Architecture, Modelling & Quality 🚧
+
 In progress.
 
-The focus of this stage is to turn the initial SQL transformations into a structured and testable data modelling workflow before model training begins.
+The goal of this stage is to reorganise the initial SQL transformations into a structured dbt workflow, define clear responsibilities between the different data layers and introduce automated data quality checks before model training begins.
 
-## ML Engineering Roadmap
-The planned workflow is:
-```
-Data ingestion
-      ↓
-Data validation
-      ↓
-Data transformation
-      ↓
-ML feature dataset
-      ↓
-Baseline model
-      ↓
-Feature engineering
-      ↓
-Model comparison
-      ↓
-Model evaluation
-      ↓
-Experiment tracking
-      ↓
-Model packaging
-      ↓
-Inference API
-      ↓
-Containerized deployment
-```
-
-The goal is not only to train a model but to understand and implement the engineering lifecycle around it. 
+---
 
 ## Modelling Considerations
-One important part of this project is identifying situations where apparently useful features could produce misleading model performance
-For example, the OSHA dataset contains a free-text injury narrative. Since the narrative may explicitly describe the final injury outcome, using it directly could introduce target leakage.
-For this reason, text-based features will initially be excluded from the baseline model and evaluated separately later in the project.
 
+A predictive model is not only about choosing an algorithm. It is also important to understand which information would realistically be available when a prediction is made.
 
-## Repository Structure
-The repository is being reorganized as the project evolves. The intended structure is:
+The OSHA dataset contains a free-text narrative describing each reported incident.
+
+These narratives may explicitly mention the final outcome of the injury. For example:
+
+> *The employee's hand became trapped in a machine and two fingers were amputated.*
+
+Since the current target identifies cases involving an amputation or loss of an eye, using this information directly could reveal the target to the model and lead to misleadingly strong performance.
+
+For this reason, the free-text narrative will be excluded from the initial structured baseline model.
+
+The narrative may later be explored separately as an NLP experiment using text representations or embeddings.
+
+---
+
+## ML Engineering Roadmap
+
+```mermaid
+flowchart TD
+    A[Data Ingestion] --> B[Data Validation]
+    B --> C[Data Transformation]
+    C --> D[ML-ready Dataset]
+    D --> E[Baseline Model]
+    E --> F[Feature Engineering]
+    F --> G[Model Comparison]
+    G --> H[Evaluation & Error Analysis]
+    H --> I[Experiment Tracking]
+    I --> J[Model Packaging]
+    J --> K[Inference API]
+    K --> L[Containerisation]
+    L --> M[Testing & CI/CD]
 ```
-├── data/
-│   ├── raw/
-│   └── processed/
+
+The goal is not only to train a model, but to understand and implement the engineering lifecycle around it.
+
+---
+
+## Planned Repository Structure
+
+```text
+incident-risk-prediction/
 │
-├── src/
-│   ├── ingestion/
-│   ├── training/
-│   └── inference/
+├── data/
+│   ├── raw/                     # Downloaded source files
+│   └── processed/               # Locally generated datasets
 │
 ├── dbt/
-│   └── models/
-│       ├── staging/
-│       ├── intermediate/
-│       ├── marts/
-│       └── ml/
+│   ├── models/
+│   │   ├── staging/             # Source cleaning and standardisation
+│   │   ├── intermediate/        # Reusable transformations and business logic
+│   │   ├── marts/               # Analytics-facing datasets
+│   │   └── ml/                  # ML-specific datasets
+│   │
+│   ├── tests/
+│   └── dbt_project.yml
 │
 ├── notebooks/
+│   ├── eda/                     # Exploratory analysis
+│   └── modelling/               # Model experimentation
 │
-├── tests/
+├── src/
+│   ├── ingestion/               # Data download and ingestion
+│   ├── training/                # Model training
+│   └── inference/               # Model inference
+│
+├── tests/                        # Python and pipeline tests
 │
 ├── README.md
-└── requirements.txt
+├── requirements.txt
+└── .gitignore
 ```
 
-## Why I am building This
+The repository structure will evolve together with the project.
 
-My professional background is primarily in data and analytics engineering, while my academic background in Mathematics and computational engineering included machine learning, optimization and numerical methods.
-I am building this project to connect those two areas: using the data engineering practices I have worked with profesionally while developing stronger hands-on experience with the machine learning lifecycle.
+---
+
+## Why I Am Building This
+
+My professional background is primarily in Data and Analytics Engineering, while my academic background in Mathematics and Computational Engineering included Machine Learning, optimisation and numerical methods.
+
+I am building this project to connect those two areas: applying the Data Engineering practices I have worked with professionally while developing stronger hands-on experience across the Machine Learning lifecycle.
+
+---
 
 ## Development Note
 
-I occasionally use AI tools for boilerplate, debugging, and exploring implementation options, in the same way I use documentation and other development resources.
+I occasionally use AI tools for boilerplate, debugging and exploring implementation options, in the same way I use documentation and other development resources.
+
 The architecture, data validation, modelling decisions, experiments, interpretation and conclusions are developed and reviewed by me.
