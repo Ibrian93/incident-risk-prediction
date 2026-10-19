@@ -1,0 +1,73 @@
+[0m15:33:24.367141 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7715d4ea6d10>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7715d37cb1c0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7715d37cb160>]}
+
+
+============================== 15:33:24.371652 | ae8934de-27c1-4e59-8436-df50e872d862 ==============================
+[0m15:33:24.371652 [info ] [MainThread]: Running with dbt=1.12.1
+[0m15:33:24.372391 [debug] [MainThread]: running dbt with arguments {'empty': 'None', 'use_experimental_parser': 'False', 'indirect_selection': 'eager', 'printer_width': '80', 'target_path': 'None', 'introspect': 'True', 'write_json': 'True', 'log_cache_events': 'False', 'partial_parse': 'True', 'version_check': 'True', 'warn_error': 'None', 'maximum_seed_size_mib': '1', 'profiles_dir': '/home/ibrian93/.dbt', 'static_parser': 'True', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'send_anonymous_usage_stats': 'True', 'invocation_command': 'dbt init osha_injury_ml', 'cache_selected_only': 'False', 'hints_enabled': 'True', 'no_print': 'None', 'debug': 'False', 'log_path': 'logs', 'fail_fast': 'False', 'use_colors': 'True', 'quiet': 'False', 'log_format': 'default'}
+[0m15:33:24.382675 [debug] [MainThread]: Starter project path: /home/ibrian93/incident-risk-prediction/.venv/lib/python3.10/site-packages/dbt/include/starter_project
+[0m15:33:24.389276 [info ] [MainThread]: Setting up your profile.
+[0m15:33:37.297963 [info ] [MainThread]: Running dbt debug to validate the project...
+[0m15:33:37.299275 [info ] [MainThread]: dbt version: 1.12.1
+[0m15:33:37.299919 [info ] [MainThread]: python version: 3.10.12
+[0m15:33:37.300499 [info ] [MainThread]: python path: /home/ibrian93/incident-risk-prediction/.venv/bin/python3
+[0m15:33:37.301039 [info ] [MainThread]: os info: Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.35
+[0m15:33:37.402104 [info ] [MainThread]: Using profiles dir at /home/ibrian93/.dbt
+[0m15:33:37.403090 [info ] [MainThread]: Using profiles.yml file at /home/ibrian93/.dbt/profiles.yml
+[0m15:33:37.403902 [info ] [MainThread]: Using dbt_project.yml file at /home/ibrian93/incident-risk-prediction/osha_injury_ml/dbt_project.yml
+[0m15:33:37.406662 [info ] [MainThread]: adapter type: duckdb
+[0m15:33:37.407281 [info ] [MainThread]: adapter version: 1.11.0
+[0m15:33:37.681406 [info ] [MainThread]: Configuration:
+[0m15:33:37.682376 [info ] [MainThread]:   profiles.yml file [[32mOK found and valid[0m]
+[0m15:33:37.682916 [info ] [MainThread]:   dbt_project.yml file [[32mOK found and valid[0m]
+[0m15:33:37.683411 [info ] [MainThread]: Required dependencies:
+[0m15:33:37.684050 [debug] [MainThread]: Executing "git --help"
+[0m15:33:37.686846 [debug] [MainThread]: STDOUT: "b"usage: git [--version] [--help] [-C <path>] [-c <name>=<value>]\n           [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]\n           [-p | --paginate | -P | --no-pager] [--no-replace-objects] [--bare]\n           [--git-dir=<path>] [--work-tree=<path>] [--namespace=<name>]\n           [--super-prefix=<path>] [--config-env=<name>=<envvar>]\n           <command> [<args>]\n\nThese are common Git commands used in various situations:\n\nstart a working area (see also: git help tutorial)\n   clone     Clone a repository into a new directory\n   init      Create an empty Git repository or reinitialize an existing one\n\nwork on the current change (see also: git help everyday)\n   add       Add file contents to the index\n   mv        Move or rename a file, a directory, or a symlink\n   restore   Restore working tree files\n   rm        Remove files from the working tree and from the index\n\nexamine the history and state (see also: git help revisions)\n   bisect    Use binary search to find the commit that introduced a bug\n   diff      Show changes between commits, commit and working tree, etc\n   grep      Print lines matching a pattern\n   log       Show commit logs\n   show      Show various types of objects\n   status    Show the working tree status\n\ngrow, mark and tweak your common history\n   branch    List, create, or delete branches\n   commit    Record changes to the repository\n   merge     Join two or more development histories together\n   rebase    Reapply commits on top of another base tip\n   reset     Reset current HEAD to the specified state\n   switch    Switch branches\n   tag       Create, list, delete or verify a tag object signed with GPG\n\ncollaborate (see also: git help workflows)\n   fetch     Download objects and refs from another repository\n   pull      Fetch from and integrate with another repository or a local branch\n   push      Update remote refs along with associated objects\n\n'git help -a' and 'git help -g' list available subcommands and some\nconcept guides. See 'git help <command>' or 'git help <concept>'\nto read about a specific subcommand or concept.\nSee 'git help git' for an overview of the system.\n""
+[0m15:33:37.687672 [debug] [MainThread]: STDERR: "b''"
+[0m15:33:37.688160 [info ] [MainThread]:  - git [[32mOK found[0m]
+
+[0m15:33:37.688542 [info ] [MainThread]: Connection:
+[0m15:33:37.688990 [info ] [MainThread]:   database: dev
+[0m15:33:37.689406 [info ] [MainThread]:   schema: main
+[0m15:33:37.689880 [info ] [MainThread]:   path: dev.duckdb
+[0m15:33:37.690272 [info ] [MainThread]:   config_options: None
+[0m15:33:37.690895 [info ] [MainThread]:   extensions: None
+[0m15:33:37.691393 [info ] [MainThread]:   settings: {}
+[0m15:33:37.691868 [info ] [MainThread]:   external_root: .
+[0m15:33:37.692410 [info ] [MainThread]:   use_credential_provider: None
+[0m15:33:37.692763 [info ] [MainThread]:   attach: None
+[0m15:33:37.693096 [info ] [MainThread]:   filesystems: None
+[0m15:33:37.693379 [info ] [MainThread]:   remote: None
+[0m15:33:37.693681 [info ] [MainThread]:   plugins: None
+[0m15:33:37.693985 [info ] [MainThread]:   disable_transactions: False
+[0m15:33:37.694517 [info ] [MainThread]: Registered adapter: duckdb=1.11.0
+[0m15:33:37.796054 [debug] [MainThread]: Acquiring new duckdb connection 'debug'
+[0m15:33:37.836158 [debug] [MainThread]: Using duckdb connection "debug"
+[0m15:33:37.836705 [debug] [MainThread]: On debug: select 1 as id
+[0m15:33:37.837090 [debug] [MainThread]: Opening a new connection, currently in state init
+[0m15:33:37.863776 [debug] [MainThread]: SQL status: OK in 0.027 seconds
+[0m15:33:37.864919 [debug] [MainThread]: On debug: Close
+[0m15:33:37.865368 [info ] [MainThread]:   Connection test: [[32mOK connection ok[0m]
+
+[0m15:33:37.865713 [info ] [MainThread]: [32mAll checks passed![0m
+[0m15:33:37.866850 [info ] [MainThread]: Your new dbt project "osha_injury_ml" was created!
+Initialized new project in /home/ibrian93/incident-risk-prediction/osha_injury_ml/osha_injury_ml
+
+For more information on how to configure the profiles.yml file,
+please consult the dbt documentation here:
+
+  https://docs.getdbt.com/docs/configure-your-profile
+
+One more thing:
+
+Need help? Don't hesitate to reach out to us via GitHub issues or on Slack:
+
+  https://community.getdbt.com/
+
+Happy modeling!
+
+[0m15:33:37.869221 [debug] [MainThread]: Resource report: {"command_name": "init", "command_success": true, "command_wall_clock_time": 13.60876, "process_in_blocks": "2048", "process_kernel_time": 0.385362, "process_mem_max_rss": "171952", "process_out_blocks": "104", "process_user_time": 4.134615}
+[0m15:33:37.869787 [debug] [MainThread]: Command `dbt init` succeeded at 15:33:37.869668 after 13.61 seconds
+[0m15:33:37.870153 [debug] [MainThread]: Connection 'debug' was properly closed.
+[0m15:33:37.870574 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7715d4ea6d10>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7715c9b9efe0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7715c9a6fbb0>]}
+[0m15:33:37.871444 [debug] [MainThread]: Flushing usage events
+[0m15:33:38.315503 [debug] [MainThread]: An error was encountered while trying to flush usage events

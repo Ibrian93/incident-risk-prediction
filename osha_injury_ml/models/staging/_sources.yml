@@ -1,0 +1,8 @@
+version: 2
+
+sources:
+  - name: osha
+    schema: main
+
+    tables:
+      - name: raw_severe_injuries
