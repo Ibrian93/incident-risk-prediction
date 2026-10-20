@@ -1,0 +1,9 @@
+[sqlfluff]
+dialect = duckdb
+templater = dbt
+
+[sqlfluff:templater:dbt]
+project_dir = .
+profiles_dir = /home/ibrian93/.dbt
+profile = osha_injury_ml
+target = dev
