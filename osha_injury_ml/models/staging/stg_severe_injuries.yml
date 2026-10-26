@@ -1,0 +1,19 @@
+version: 2
+
+models:
+  - name: stg_severe_injuries
+    description: >
+      Cleaned and standardized representation of the OSHA Severe Injury
+      Report source data. One row should represent one OSHA report.
+
+    columns:
+      - name: incident_id
+        description: Unique identifier of the OSHA severe injury report.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: event_date
+        description: Date when the reported injury occurred.
+        data_tests:
+          - not_null
