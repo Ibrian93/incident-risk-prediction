@@ -1,0 +1,28 @@
+version: 2
+
+models:
+  - name: ml_injury_features
+    description: >
+      Machine Learning-ready dataset derived from OSHA severe injury reports.
+      Contains candidate predictor variables and the binary target used for model training.
+
+    columns:
+      - name: incident_id
+        description: Identifier provided by the OSHA source.
+        data_tests:
+          - not_null
+
+      - name: event_date
+        description: Date when the reported injury occurred.
+        data_tests:
+          - not_null
+
+      - name: high_severity_outcome
+        description: >
+          Binary target used for classification.
+          1 indicates an amputation or loss of an eye; otherwise 0.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [0, 1]
