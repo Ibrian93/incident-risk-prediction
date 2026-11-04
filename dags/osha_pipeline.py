@@ -9,12 +9,13 @@ with DAG(
     catchup=False,
 ) as dag:
     
-    @task
-    def extract_and_load_raw():
-        # TODO: 
-        # 1. Download OSHA data
-        # 2. Load/update
-        pass
+    run_extract_and_load_raw = BashOperator(
+        task_id="run_extract_and_load_raw",
+        bash_command="""
+        cd /home/ibrian93/incident-risk-prediction/osha_injury_ml &&
+        python src/download_data.py 
+        """
+    )
     
     run_staging = BashOperator(
         task_id="run_staging",
@@ -23,9 +24,7 @@ with DAG(
         dbt run --select stg_severe_injuries
         """
     )
-
-    raw = extract_and_load_raw()
     
-    raw >> run_staging
+    run_extract_and_load_raw >> run_staging
     
      
