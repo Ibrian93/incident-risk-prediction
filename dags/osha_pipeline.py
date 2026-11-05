@@ -12,19 +12,19 @@ with DAG(
     run_extract_and_load_raw = BashOperator(
         task_id="run_extract_and_load_raw",
         bash_command="""
-        cd /home/ibrian93/incident-risk-prediction/osha_injury_ml &&
-        python src/download_data.py 
-        """
+        cd /home/ibrian93/incident-risk-prediction &&
+        /home/ibrian93/incident-risk-prediction/.venv/bin/python src/download_data.py
+    """
     )
     
     run_staging = BashOperator(
         task_id="run_staging",
         bash_command="""
         cd /home/ibrian93/incident-risk-prediction/osha_injury_ml &&
-        dbt run --select stg_severe_injuries
-        """
-    )
-    
+        /home/ibrian93/incident-risk-prediction/.venv/bin/dbt \
+        run --select stg_severe_injuries
+    """
+)
     run_extract_and_load_raw >> run_staging
     
      

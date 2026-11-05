@@ -9,6 +9,7 @@ __pycache__/
 *.pyc
 .venv/
 .env
+.venv-airflow/
 
 #notebooks
 .ipynb_checkpoints/

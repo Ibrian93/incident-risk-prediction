@@ -7,4 +7,5 @@ matplotlib
 plotly
 scikit-learn
 python-dotenv
-dbt
+dbt-core
+dbt-duckdb
