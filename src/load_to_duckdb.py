@@ -4,8 +4,8 @@ import pandas as pd
 import duckdb
 
 ZIP_PATH = Path("data/raw/osha_severe_injuries.zip")
-DUCKDB_PATH = Path("data/processed/safety.duckdb")
-TABLE_NAME = "raw_severe_injuries"
+DUCKDB_PATH = Path("data/processed/safety_dev.duckdb")
+TABLE_NAME = "bronze.raw_severe_injuries"
 
 
 def load_csv_from_zip(zip_path: Path) -> pd.DataFrame:
@@ -30,6 +30,7 @@ def load_to_duckdb(df: pd.DataFrame, db_path: Path, table_name: str) -> None:
     db_path.parent.mkdir(parents=True, exist_ok=True)
 
     con = duckdb.connect(str(db_path))
+    con.execute(f"CREATE SCHEMA IF NOT EXISTS bronze")
     con.register("df_view", df)
     con.execute(f"CREATE OR REPLACE TABLE {table_name} as SELECT * FROM df_view")
     con.close()

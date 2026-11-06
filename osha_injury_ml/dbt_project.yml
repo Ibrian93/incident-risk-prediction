@@ -33,9 +33,12 @@ models:
   osha_injury_ml:
     staging:
       +materialized: view
+      +schema: silver
 
     intermediate:
       +materialized: view
+      +schema: silver
 
     ml:
       +materialized: table
+      +schema: gold

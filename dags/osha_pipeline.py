@@ -14,6 +14,7 @@ with DAG(
         bash_command="""
         cd /home/ibrian93/incident-risk-prediction &&
         /home/ibrian93/incident-risk-prediction/.venv/bin/python src/download_data.py
+        
     """
     )
     
