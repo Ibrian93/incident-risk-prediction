@@ -17,9 +17,17 @@ __pycache__/
 
 #models
 models/*.pk1
+models/*.pkl
 models/*.joblib
 
 # Windows downloaded file metadata
 *:Zone.Identifier
 
 .vscode/
+# Generated runtime artifacts
+logs/
+**/logs/
+*.zip.part
+
+# dbt local user metadata
+**/.user.yml
