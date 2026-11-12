@@ -3,8 +3,7 @@ import zipfile
 import pandas as pd
 import duckdb
 
-ZIP_PATH = Path("data/raw/osha_severe_injuries.zip")
-DUCKDB_PATH = Path("data/processed/safety_dev.duckdb")
+from config import ZIP_PATH, DUCKDB_PATH
 TABLE_NAME = "bronze.raw_severe_injuries"
 
 
@@ -12,16 +11,16 @@ def load_csv_from_zip(zip_path: Path) -> pd.DataFrame:
     if not zip_path.exists():
         raise FileNotFoundError(f"Missing file: {zip_path}. Run `python src/download_data.py` first.")
     with zipfile.ZipFile(zip_path, "r") as zip_file:
-        csv_files = [name for name in zip_file.namelist() if name.endswith(".csv")]
+        csv_files = [name for name in zip_file.namelist() if name.lower().endswith(".csv")]
 
-        if not csv_files:
-            raise ValueError("No CSV file found inside the ZIP.")
+        if len(csv_files) != 1:
+            raise ValueError(f"Expected exactly one CSV in the source ZIP, found {len(csv_files)}.")
 
         csv_name = csv_files[0]
         print(f"Reading {csv_name} from ZIP...")
 
         with zip_file.open(csv_name) as csv_file:
-            df = pd.read_csv(csv_file, low_memory=False)
+            df = pd.read_csv(csv_file, dtype=str, keep_default_na=False, na_filter=False)
 
     return df
 
@@ -29,11 +28,12 @@ def load_csv_from_zip(zip_path: Path) -> pd.DataFrame:
 def load_to_duckdb(df: pd.DataFrame, db_path: Path, table_name: str) -> None:
     db_path.parent.mkdir(parents=True, exist_ok=True)
 
-    con = duckdb.connect(str(db_path))
-    con.execute(f"CREATE SCHEMA IF NOT EXISTS bronze")
-    con.register("df_view", df)
-    con.execute(f"CREATE OR REPLACE TABLE {table_name} as SELECT * FROM df_view")
-    con.close()
+    if table_name != TABLE_NAME:
+        raise ValueError(f"Raw loader only supports {TABLE_NAME}.")
+    with duckdb.connect(str(db_path)) as con:
+        con.execute("CREATE SCHEMA IF NOT EXISTS bronze")
+        con.register("df_view", df)
+        con.execute("CREATE OR REPLACE TABLE bronze.raw_severe_injuries AS SELECT * FROM df_view")
 
     print(f"Loaded {len(df):,} rows into {db_path}, table: {table_name}")
 

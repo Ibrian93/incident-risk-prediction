@@ -1,8 +1,10 @@
 version: 2
-
 sources:
   - name: osha
     schema: bronze
-
+    description: >
+      Current CSV snapshot loaded as text without trimming, null replacement,
+      deduplication or business transformations. The original ZIP is retained.
     tables:
       - name: raw_severe_injuries
+        description: One row per CSV record, including source duplicates.
