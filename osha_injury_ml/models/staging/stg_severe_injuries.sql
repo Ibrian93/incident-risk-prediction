@@ -1,31 +1,36 @@
-select
-    cast(ID as varchar) as INCIDENT_ID,
-    UPA,
-    cast(try_strptime("EventDate", '%m/%d/%Y') as date) as EVENT_DATE,
-    "Employer" as EMPLOYER,
-    trim('Address1') as MAIN_ADDRESS,
-    trim('Address2') as SECONDARY_ADDRESS,
-    trim('City') as CITY,
-    trim('State') as STATE,
-    ZIP as ZIP_CODE,
-    "Latitude" as LATITUDE,
-    "Longitude" as LONGITUDE,
-    cast("Primary NAICS" as varchar) as PRIMARY_NAICS,
-    "Hospitalized" as HOSPITALIZED,
-    "Amputation" as AMPUTATION,
-    "Loss of Eye" as LOSS_OF_EYE,
-    "Inspection" as INSPECTION,
-    "Final Narrative" as FINAL_NARRATIVE,
-    NATURE as NATURE_CODE,
-    "NatureTitle" as NATURE_TITLE,
-    "Part of Body" as BODY_PART_CODE,
-    "Part of Body Title" as BODY_PART_TITLE,
-    EVENT as EVENT_CODE,
-    "EventTitle" as EVENT_TITLE,
-    SOURCE as SOURCE_CODE,
-    "SourceTitle" as SOURCE_TITLE,
-    "Secondary Source" as SECONDARY_SOURCE_CODE,
-    "Secondary Source Title" as SECONDARY_SOURCE_TITLE,
-    "FederalState" as FEDERAL_STATE_FLAG
+-- Remove exact source duplicates only. Conflicting report keys fail a data test.
+with source_rows as (
+    select distinct *
+    from {{ source('osha', 'raw_severe_injuries') }}
+)
 
-from {{ source('osha', 'raw_severe_injuries') }}
+select
+    nullif(trim("ID"), '') as incident_id,
+    nullif(trim("UPA"), '') as upa,
+    cast(try_strptime(trim("EventDate"), '%m/%d/%Y') as date) as event_date,
+    nullif(trim("Employer"), '') as employer,
+    nullif(trim("Address1"), '') as main_address,
+    nullif(trim("Address2"), '') as secondary_address,
+    nullif(trim("City"), '') as city,
+    nullif(upper(trim("State")), '') as state,
+    nullif(trim("Zip"), '') as zip_code,
+    try_cast(nullif(trim("Latitude"), '') as double) as latitude,
+    try_cast(nullif(trim("Longitude"), '') as double) as longitude,
+    nullif(trim("Primary NAICS"), '') as primary_naics,
+    try_cast(nullif(trim("Hospitalized"), '') as integer) as hospitalized_count,
+    try_cast(nullif(trim("Amputation"), '') as integer) as amputation_count,
+    try_cast(nullif(trim("Loss of Eye"), '') as integer) as loss_of_eye_count,
+    nullif(trim("Inspection"), '') as inspection,
+    nullif(trim("Final Narrative"), '') as final_narrative,
+    nullif(trim("Nature"), '') as nature_code,
+    nullif(trim("NatureTitle"), '') as nature_title,
+    nullif(trim("Part of Body"), '') as body_part_code,
+    nullif(trim("Part of Body Title"), '') as body_part_title,
+    nullif(trim("Event"), '') as event_code,
+    nullif(trim("EventTitle"), '') as event_title,
+    nullif(trim("Source"), '') as source_code,
+    nullif(trim("SourceTitle"), '') as source_title,
+    nullif(trim("Secondary Source"), '') as secondary_source_code,
+    nullif(trim("Secondary Source Title"), '') as secondary_source_title,
+    nullif(trim("FederalState"), '') as federal_state_flag
+from source_rows

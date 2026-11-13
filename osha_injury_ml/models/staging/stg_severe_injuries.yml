@@ -1,18 +1,26 @@
 version: 2
-
 models:
   - name: stg_severe_injuries
     description: >
-      Cleaned and standardized representation of the OSHA Severe Injury
-      Report source data. One row should represent one OSHA report.
-
+      Silver report-level dataset. Exact raw duplicates are removed before
+      cleaning. Conflicting incident_id and event_date keys fail validation.
+      No business target or analytical aggregates are derived.
     columns:
       - name: incident_id
-        description: Unique identifier of the OSHA severe injury report.
+        description: Source identifier, not globally unique by itself.
         data_tests:
           - not_null
-
       - name: event_date
-        description: Date when the reported injury occurred.
+        description: Parsed source event date.
         data_tests:
           - not_null
+      - name: primary_naics
+        description: Industry code retained as text.
+      - name: zip_code
+        description: Postal code retained as text to preserve leading zeros.
+      - name: hospitalized_count
+        description: Source count parsed as integer. Missing values remain null.
+      - name: amputation_count
+        description: Source count parsed as integer. Missing values remain null.
+      - name: loss_of_eye_count
+        description: Source count parsed as integer. Missing values remain null.
