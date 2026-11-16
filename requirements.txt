@@ -1,11 +1,1 @@
-pandas
-duckdb
-requests
-jupyter
-ipykernel
-matplotlib
-plotly
-scikit-learn
-python-dotenv
-dbt-core
-dbt-duckdb
+-r requirements-runtime.txt
