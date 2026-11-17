@@ -1,0 +1,6 @@
+services:
+  pipeline:
+    volumes:
+      - ./src:/opt/project/src:ro
+      - ./osha_injury_ml:/opt/project/osha_injury_ml
+      - ./config/dbt:/opt/project/config/dbt:ro

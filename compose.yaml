@@ -1,0 +1,22 @@
+services:
+  pipeline:
+    build:
+      context: .
+      target: pipeline
+    image: incident-risk-prediction:local
+    environment:
+      PROJECT_ROOT: /opt/project
+      DUCKDB_PATH: /opt/project/data/processed/safety.duckdb
+      DBT_PROFILES_DIR: /opt/project/config/dbt
+      SOURCE_ZIP_PATH: /opt/source/osha.zip
+    volumes:
+      - pipeline-data:/opt/project/data
+      - type: bind
+        source: ./January2015toOctober2025.zip
+        target: /opt/source/osha.zip
+        read_only: true
+        bind:
+          create_host_path: false
+
+volumes:
+  pipeline-data:
