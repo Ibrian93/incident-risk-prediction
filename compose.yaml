@@ -18,5 +18,28 @@ services:
         bind:
           create_host_path: false
 
+  duckdb-ui:
+    profiles: ["tools"]
+    build:
+      context: .
+      target: viewer
+    image: incident-risk-prediction-ui:local
+    init: true
+    environment:
+      DUCKDB_PATH: /opt/project/data/processed/safety.duckdb
+      UI_CATALOG_PATH: /opt/ui/catalog.duckdb
+    ports:
+      - "127.0.0.1:4213:4214"
+    volumes:
+      - pipeline-data:/opt/project/data:ro
+      - ui-data:/opt/ui
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:4214/info', timeout=5)"]
+      interval: 15s
+      timeout: 8s
+      start_period: 20s
+      retries: 3
+
 volumes:
   pipeline-data:
+  ui-data:

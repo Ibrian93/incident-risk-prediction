@@ -15,4 +15,12 @@ RUN mkdir -p data/raw data/processed
 CMD ["python", "src/run_pipeline.py"]
 
 
+FROM runtime AS viewer
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends socat \
+    && rm -rf /var/lib/apt/lists/*
+RUN python -c "import duckdb; duckdb.connect().execute(\"INSTALL ui FROM 'https://extensions.duckdb.org'\")"
+CMD ["python", "src/browse_data.py"]
+
+# Keep plain docker build targeting the batch pipeline by default.
 FROM runtime AS pipeline

@@ -1,45 +1,21 @@
-from pathlib import Path
+"""Inspect the bronze and silver datasets without modifying the database."""
 import duckdb
 
-DUCKDB_PATH = Path("data/processed/safety.duckdb")
+from config import DUCKDB_PATH
+
 
 def main() -> None:
-    con = duckdb.connect(str(DUCKDB_PATH))
+    with duckdb.connect(str(DUCKDB_PATH), read_only=True) as con:
+        for relation in ["bronze.raw_severe_injuries", "silver.stg_severe_injuries"]:
+            print(f"\n{relation}")
+            print(con.execute(f"SELECT COUNT(*) AS rows FROM {relation}").fetchdf())
+            print(con.execute(f"DESCRIBE {relation}").fetchdf())
+        print(con.execute("""
+            SELECT MIN(event_date) AS first_event, MAX(event_date) AS last_event,
+                   COUNT(DISTINCT state) AS states
+            FROM silver.stg_severe_injuries
+        """).fetchdf())
 
-    print("\nRow count:")
-    print(con.execute("SELECT COUNT(*) FROM raw_severe_injuries").fetchdf())
-
-    print("\nSchema:")
-    print(con.execute("DESCRIBE raw_severe_injuries").fetchdf())
-
-    print("\nSample rows:")
-    print(con.execute("SELECT * FROM raw_severe_injuries LIMIT 5").fetchdf())
-
-
-    print("\nDate range:")
-    print(con.execute(
-        """
-        SELECT 
-            MIN(TRY_CAST(EventDate AS DATE)) AS min_event_date,
-            MAX(TRY_CAST(EventDate AS DATE)) AS max_event_date
-        FROM raw_severe_injuries
-        """
-    ).fetchdf())
-
-    print("\nOutcome counts")
-    print(
-            con.execute(
-                """
-                SELECT
-                    SUM(COALESCE(Hospitalized, 0)) AS total_hospitalized,
-                    SUM(COALESCE(Amputation, 0)) AS total_amputations,
-                    SUM(COALESCE("Loss of Eye", 0)) AS total_loss_of_eye
-                FROM raw_severe_injuries
-                """
-                ).fetchdf()
-            )
-
-    con.close()
 
 if __name__ == "__main__":
     main()
