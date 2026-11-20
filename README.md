@@ -1,431 +1,298 @@
-# Workplace Severe Injury Intelligence
+# Workplace Injury Data Platform
 
-An end-to-end Data and Machine Learning Engineering project built using public OSHA Severe Injury Report data.
+A Docker-based Data Engineering project using public OSHA Severe Injury Report
+data. The current implementation covers source acquisition, raw ingestion into
+DuckDB and silver cleaning with dbt.
 
-I chose this dataset because the domain is closely related to my previous professional experience. During my time at Roche, I worked within Global SHE (Safety, Health and Environment), where I contributed to data products used for safety reporting and decision-making.
+My experience working with safety data in Global SHE motivated the choice of
+dataset. This phase establishes a reliable report-level dataset before selecting
+a downstream analytical or predictive use case.
 
-With this project, I want to combine that domain knowledge with my background in Data Engineering and my academic experience in Machine Learning.
-
-The goal is to build the complete workflow myself — from raw data ingestion and transformation to model training, evaluation and, eventually, deployment.
-
-The project is being developed incrementally, with the main technical and modelling decisions documented as I progress.
-
----
-
-## Project Objective
-
-The dataset contains severe workplace injuries reported to OSHA.
-
-Because every record already represents a severe injury, the initial Machine Learning problem is **not** to predict whether an arbitrary workplace incident will become severe.
-
-Instead, the first modelling task is a binary classification problem over reported severe injury cases.
-
-The initial target is:
-
-- `1` — the reported case involved an amputation or loss of an eye
-- `0` — the reported case did not contain either of those outcomes
-
-This definition may evolve as I learn more about the dataset and evaluate the modelling problem.
-
-Beyond model performance, the broader objective is to build a reproducible workflow around both the data and the model rather than limiting the project to experimentation inside a notebook.
-
----
-
-## Data Source
-
-The project uses the public OSHA Severe Injury Report dataset.
-
-OSHA requires employers to report certain severe work-related injuries, including:
-
-- in-patient hospitalizations
-- amputations
-- loss of an eye
-
-The reporting requirement started on January 1, 2015.
-
-The raw dataset is not committed to this repository. It can be downloaded by running:
-
-```bash
-python src/download_data.py
-```
-
----
-
-## Current Architecture
-
-The project follows an **ELT architecture**.
-
-The OSHA data is first loaded into DuckDB. Transformations are then handled with dbt.
+## Current architecture
 
 ```mermaid
-flowchart TD
-    A[OSHA Severe Injury Reports] --> B[Raw CSV]
-    B --> C[(DuckDB)]
-    C --> D[raw_severe_injuries]
-    D --> E[stg_severe_injuries]
-    E --> F[int_injury_cases]
-    F --> G[ml_injury_features]
-    G --> H[Model Training]
-    H --> I[Model Evaluation]
-    I --> J[Model Deployment]
+flowchart LR
+    A[OSHA downloadable ZIP / included snapshot] --> B[data/raw: original ZIP]
+    B --> C[(bronze.raw_severe_injuries)]
+    C --> D[dbt cleaning and exact deduplication]
+    D --> E[(silver.stg_severe_injuries)]
+    E --> F[dbt data tests]
 ```
 
-The current dbt flow is:
+The current source is a downloadable ZIP containing a CSV. An API integration
+has not been implemented.
 
-```text
-raw_severe_injuries
-        │
-        ▼
-stg_severe_injuries
-        │
-        ▼
-int_injury_cases
-        │
-        ▼
-ml_injury_features
-```
+| Layer | Responsibility |
+|---|---|
+| Source | OSHA CSV snapshot distributed as a ZIP |
+| Raw / bronze | Retain the ZIP and ingest every CSV record into DuckDB as text |
+| Silver | Rename columns, trim whitespace, convert empty values to null, parse types and remove exact source duplicates |
 
-I am deliberately not creating an analytics mart yet.
+Gold and ML are deferred until the business use case and required outputs are
+defined. The former experiments, reports and gold models have been removed from
+the active repository.
 
-The main consumer of the transformed data is currently the Machine Learning pipeline. If the project later includes a dashboard or another analytical use case, I will introduce dedicated marts when there is an actual reason for them to exist.
+## Quick start with Docker
 
----
-
-## Data Models
-
-### `raw_severe_injuries`
-
-Raw OSHA data loaded into DuckDB by the ingestion process.
-
-This table is not created by dbt, so it is registered as a dbt `source()`.
-
----
-
-### `stg_severe_injuries`
-
-Source-oriented staging model.
-
-It handles basic cleaning and standardisation such as:
-
-- renaming columns
-- casting data types
-- parsing dates
-- handling some null values
-- standardising source fields
-
-It is materialized as a **view**.
-
----
-
-### `int_injury_cases`
-
-Reusable representation of an OSHA severe injury report.
-
-This is where I introduce derived fields and modelling logic such as:
-
-- event year
-- event month
-- day of week
-- NAICS industry levels
-- the initial ML target
-
-The intended grain is:
-
-> One row represents one OSHA Severe Injury Report.
-
-While testing this model, I found that OSHA's source `ID` is not globally unique across the dataset.
-
-Some IDs are reused for different reports with different dates, employers and locations.
-
-The combination:
-
-```text
-incident_id + event_date
-```
-
-is currently unique in the dataset and is validated with a dbt test.
-
-The model is materialized as a **view**.
-
----
-
-### `ml_injury_features`
-
-Dataset prepared specifically for Machine Learning.
-
-It contains candidate predictor variables together with:
-
-```text
-high_severity_outcome
-```
-
-as the target.
-
-Fields that would directly reveal the target are excluded.
-
-For example:
-
-```text
-amputation_count
-loss_of_eye_count
-```
-
-are not features because they are used to define the target itself.
-
-The free-text injury narrative is also excluded from the initial structured baseline because it may explicitly describe the final outcome.
-
-The ML dataset is materialized as a **table** so that model training can work against a stable prepared dataset.
-
----
-
-## dbt Lineage
-
-Dependencies are defined using `source()` and `ref()` rather than hard-coded relation names.
-
-```text
-raw_severe_injuries
-        │
-     source()
-        ▼
-stg_severe_injuries
-        │
-       ref()
-        ▼
-int_injury_cases
-        │
-       ref()
-        ▼
-ml_injury_features
-```
-
-This allows dbt to understand the dependency graph and execute models in the correct order.
-
----
-
-## Data Quality
-
-Data quality assumptions are implemented as dbt tests.
-
-Current checks include:
-
-### Staging
-
-- `incident_id` must not be null
-- `event_date` must not be null
-- `incident_id + event_date` must be unique in the current dataset
-
-### Intermediate
-
-- `incident_id` must not be null
-- `event_date` must not be null
-- `high_severity_outcome` must not be null
-- `high_severity_outcome` must contain only `0` or `1`
-
-### ML Dataset
-
-- identifiers must be present
-- event dates must be present
-- the target must not be null
-- the target must contain only valid binary values
-
-The complete dbt pipeline can be built and validated with:
+Install Docker Engine or Docker Desktop with Docker Compose. On Windows, enable
+the WSL 2 engine and Ubuntu integration in Docker Desktop, then run the commands
+below from Ubuntu/WSL in the repository root.
 
 ```bash
-dbt build
+docker version
+docker compose build
+docker compose run --rm pipeline
 ```
 
----
+`docker version` must show both Client and Server. A missing
+`/var/run/docker.sock` indicates that the terminal cannot reach the Docker engine.
 
-## Technology Stack
+Compose mounts the included `January2015toOctober2025.zip` read-only as
+`/opt/source/osha.zip`. On first execution, the pipeline copies it to the data
+volume automatically. This supports reproducible execution when OSHA rejects
+automated downloads with HTTP 403.
 
-### Currently used
+The pipeline stops on a failed stage and runs acquisition, bronze loading, and
+`dbt build`. It exits after silver validation.
 
-**Data Engineering**
-- Python
-- SQL
-- DuckDB
-- dbt
+### Inspect the database
 
-**Data Analysis & Machine Learning**
-- pandas
-- scikit-learn
-- matplotlib
-
-**Development & Data Quality**
-- Git
-- GitHub
-- SQLFluff
-- dbt tests
-
-### Planned
-
-As the project moves into the ML Engineering stages, I plan to introduce tools where they solve a concrete problem, including:
-
-- MLflow
-- FastAPI
-- Docker
-- automated Python tests
-- CI/CD
-
----
-
-## Project Progress
-
-### Day 1 — Data Ingestion ✅
-
-- downloaded the OSHA Severe Injury Report dataset
-- loaded the raw CSV into DuckDB
-- created the initial raw data layer
-- resolved date parsing issues
-- defined the first version of the ML target
-
----
-
-### Day 2 — Exploratory Data Analysis ✅
-
-- analysed the target distribution
-- explored cases by year and state
-- analysed event types, body parts and injury sources
-- created initial visualisations
-- identified data quality issues
-- started evaluating which information could realistically be used as model input
-
----
-
-### Day 3 — Data Architecture, Modelling & Quality ✅
-
-- introduced dbt with DuckDB
-- registered the raw OSHA table as a dbt source
-- reorganised transformations into staging, intermediate and ML layers
-- introduced `source()` and `ref()` dependencies
-- defined the grain of the injury-case model
-- added automated dbt data tests
-- discovered that OSHA source IDs are not globally unique
-- validated `incident_id + event_date` as unique in the current dataset
-- created a dedicated ML feature dataset
-- removed direct target-leakage fields from the ML dataset
-- generated dbt documentation and inspected the lineage
-- cleaned up the previous manually created `fct_injury_cases` table
-- validated the complete pipeline with `dbt build`
-
----
-
-### Day 4 — Baseline Machine Learning Model
-
-Next.
-
-The next goal is to establish a simple baseline model before moving into more complex feature engineering or algorithms.
-
----
-
-## Modelling Considerations
-
-One of the main issues I want to be careful about is **target leakage**.
-
-The OSHA dataset includes a free-text narrative describing what happened during each incident.
-
-For example, a narrative could explicitly mention that a worker's finger was amputated.
-
-Since my current target identifies whether a case involved an amputation or loss of an eye, giving that final narrative to the model could reveal the answer directly.
-
-For that reason, the free-text narrative is excluded from the first structured ML baseline.
-
-It may later become a separate NLP experiment, but that would require thinking carefully about the prediction use case and what information would actually be available at prediction time.
-
----
-
-## ML Engineering Roadmap
-
-```mermaid
-flowchart TD
-    A[Data Ingestion] --> B[Data Modelling & Validation]
-    B --> C[ML-ready Dataset]
-    C --> D[Baseline Model]
-    D --> E[Feature Engineering]
-    E --> F[Model Comparison]
-    F --> G[Evaluation & Error Analysis]
-    G --> H[Experiment Tracking]
-    H --> I[Model Packaging]
-    I --> J[Inference API]
-    J --> K[Containerisation]
-    K --> L[Testing & CI/CD]
+```bash
+docker compose run --rm pipeline python src/inspect_raw_data.py
 ```
 
-The objective is not only to train a model, but to understand and implement the engineering lifecycle around it.
+This prints bronze/silver row counts, column types and the silver date range.
 
----
+### Explore data in the browser
 
-## Repository Structure
+After the pipeline has completed, start the optional DuckDB UI service.
+
+```bash
+docker compose up -d --build duckdb-ui
+```
+
+Open [http://localhost:4213](http://localhost:4213) using the hostname
+`localhost`. The native UI checks the browser origin, so use this URL
+consistently.
+
+The database is attached as `injuries`. Expand its `bronze` and `silver`
+schemas in the explorer, then open a SQL notebook and run queries such as:
+
+```sql
+SELECT *
+FROM injuries.silver.stg_severe_injuries
+LIMIT 100;
+
+SELECT state, count(*) AS reports
+FROM injuries.silver.stg_severe_injuries
+GROUP BY state
+ORDER BY reports DESC;
+```
+
+The viewer mounts `pipeline-data` read-only and attaches the database in read-only
+mode. UI notebooks and metadata use a separate writable `ui-data` volume.
+The browser port is published on the local computer's loopback address.
+
+Stop the viewer before loading or rebuilding data so DuckDB can obtain its
+write lock. Restart it after the pipeline finishes.
+
+```bash
+docker compose stop duckdb-ui
+docker compose run --rm pipeline
+docker compose up -d duckdb-ui
+```
+
+Use the same Compose project name for the pipeline and viewer. If you loaded
+data with `-p incident-medallion`, start its viewer with:
+
+```bash
+docker compose -p incident-medallion up -d --build duckdb-ui
+```
+
+If the database is missing, the viewer exits with an instruction to run the
+pipeline first. Check service status and logs when troubleshooting:
+
+```bash
+docker compose ps duckdb-ui
+docker compose logs --tail 50 duckdb-ui
+```
+
+The `tools` profile keeps the viewer optional when running the batch pipeline.
+Its separate image installs the official DuckDB UI extension and a TCP forwarder
+for access through Docker Desktop's normal port mapping. The forwarder supports
+DuckDB's IPv4 or IPv6 loopback listener. Host networking configuration is not
+required.
+
+The native UI fetches its frontend assets from `https://ui.duckdb.org` and needs
+internet access to load them. Queries against the attached local database execute
+locally. See [DuckDB UI documentation](https://duckdb.org/docs/stable/core_extensions/ui).
+
+### Persistence and repeat runs
+
+The Compose-managed `pipeline-data` volume holds the source ZIP and
+`data/processed/safety.duckdb`. Each computer has its own volume.
+
+- Acquisition reuses a valid ZIP already present in the volume.
+- Bronze is replaced with the complete current CSV on each run.
+- Silver is rebuilt as a table on each run.
+- Execute one pipeline at a time against the database.
+- `docker compose down` preserves the volume. Adding `--volumes` deletes it.
+
+This is a full-refresh snapshot pipeline. Historical versions and incremental
+ingestion are future design decisions. Rebuilding silver requires rerunning dbt.
+
+Existing volumes can still contain tables from the previous project scope.
+They are outside the current pipeline. To start with a separate database while
+preserving the old volume, use a different Compose project name consistently.
+
+```bash
+docker compose -p incident-medallion run --rm pipeline
+```
+
+## Source acquisition and configuration
+
+The downloader first reuses `data/raw/osha_severe_injuries.zip`, then checks the
+configured local source ZIP. If neither exists, it requests the OSHA download URL.
+Files are validated as ZIPs before being published at the destination.
+
+| Variable | Container default / Compose value |
+|---|---|
+| `PROJECT_ROOT` | `/opt/project` |
+| `DUCKDB_PATH` | `/opt/project/data/processed/safety.duckdb` |
+| `DBT_PROFILES_DIR` | `/opt/project/config/dbt` |
+| `SOURCE_ZIP_PATH` | `/opt/source/osha.zip` in Compose |
+
+To use another local snapshot, change the source bind mount in `compose.yaml`.
+Acquisition reuses the existing destination ZIP, so use a separate Compose project
+volume for a new snapshot, or explicitly replace the destination before rerunning.
+
+The original source URL is
+[OSHA Severe Injury Reports ZIP](https://www.osha.gov/sites/default/files/January2015toOctober2025.zip).
+The included snapshot covers January 2015 through October 2025.
+
+## Data contracts
+
+### Bronze
+
+`bronze.raw_severe_injuries` preserves source column names and parsed CSV field
+values, including empty strings, leading zeros, whitespace and duplicate rows.
+All columns are stored as text. The ZIP retains the original file bytes.
+
+Reading CSV necessarily decodes its format. Bronze preserves field values rather
+than the CSV quoting or line-ending representation. The loader requires exactly
+one CSV in the ZIP.
+
+### Silver
+
+`silver.stg_severe_injuries` is materialized as a table.
+
+- Column names use snake_case.
+- Text fields are trimmed and empty values become null.
+- State abbreviations are uppercased.
+- Dates use the source month/day/year format.
+- Coordinates and source outcome counts are converted to numeric types.
+- Identifiers, postal codes, industry codes and injury classification codes
+  remain text.
+- Exact duplicates across all raw columns are removed before cleaning.
+- No target, feature set, aggregation or outcome imputation is introduced.
+
+One row represents a reported case after exact-source deduplication.
+`incident_id` alone is not globally unique. The observed combination
+`incident_id + event_date` is tested, rather than assumed to be a permanent source
+guarantee. Conflicting records fail validation and are retained for investigation.
+
+Missing counts remain null. Non-empty date or numeric values that cannot be
+parsed fail a data test. Failed runs may leave rebuilt tables in place, so a
+successful process exit is required before consuming silver.
+
+## Quality checks
+
+dbt validates:
+
+- Non-null incident identifiers and parsed event dates.
+- Uniqueness of the observed incident/date key.
+- Silver row count equals the number of distinct raw records.
+- Non-empty source date and numeric values can be parsed.
+
+Run the same build and tests independently inside the container.
+
+```bash
+docker compose run --rm pipeline dbt build --project-dir osha_injury_ml
+```
+
+Bronze must already exist. Unit/integration checks can be run locally with
+`python -m unittest discover -s tests -v` after installing `requirements.txt`.
+
+## Verification
+
+The Docker image was built and the complete pipeline passed against a new,
+independent validation volume using Python 3.12.
+
+- Bronze and silver each contain 105,318 rows for the included snapshot.
+- All bronze columns are VARCHAR and the retained ZIP matches the source SHA-256.
+- All five dbt data tests pass.
+- The new database contains no gold tables.
+- The browser service returns HTTP 200 and a SQL query over HTTP returns
+  105,318 silver rows. Attempted writes to the attached data are rejected.
+- Three regression tests pass, covering exact duplicates, repeated IDs on distinct
+  dates, leading zeros, whitespace, empty source counts, repeat runs, conflicting
+  keys and malformed numeric input.
+
+The validation used the included snapshot. It does not establish that OSHA
+currently accepts automated downloads.
+
+## Development
+
+```bash
+docker compose -f compose.yaml -f compose.dev.yaml run --rm pipeline
+```
+
+This mounts the source code and dbt project. Rebuild the image after changing
+runtime dependencies.
+
+For local Python execution, install `requirements.txt` in a virtual environment
+and run `python src/run_pipeline.py`. Paths resolve from the repository, and
+the runner supplies dbt environment variables.
+
+The DAG in `dags/osha_pipeline.py` provides the same acquisition, loading and
+silver-build sequence for an existing Airflow 3 installation with the standard
+provider. Airflow services are outside the current Compose configuration.
+
+## Repository structure
 
 ```text
-incident-risk-prediction/
-│
-├── data/
-│   ├── raw/
-│   └── processed/
-│       └── safety.duckdb
-│
-├── docs/
-│   └── learning_notes.md
-│
-├── notebooks/
-│
+.
+├── Dockerfile
+├── compose.yaml
+├── compose.dev.yaml
+├── config/dbt/profiles.yml
+├── January2015toOctober2025.zip
 ├── src/
-│   └── download_data.py
-│
+│   ├── browse_data.py
+│   ├── config.py
+│   ├── download_data.py
+│   ├── load_to_duckdb.py
+│   ├── run_pipeline.py
+│   └── inspect_raw_data.py
 ├── osha_injury_ml/
-│   │
-│   ├── models/
-│   │   ├── staging/
-│   │   │   ├── _sources.yml
-│   │   │   ├── stg_severe_injuries.sql
-│   │   │   └── stg_severe_injuries.yml
-│   │   │
-│   │   ├── intermediate/
-│   │   │   ├── int_injury_cases.sql
-│   │   │   └── int_injury_cases.yml
-│   │   │
-│   │   ├── marts/
-│   │   │
-│   │   └── ml/
-│   │       ├── ml_injury_features.sql
-│   │       └── ml_injury_features.yml
-│   │
+│   ├── models/staging/
 │   ├── tests/
-│   │   └── assert_unique_incident_id_event_date.sql
-│   │
-│   ├── dbt_project.yml
-│   └── .sqlfluff
-│
-├── README.md
-├── requirements.txt
-└── .gitignore
+│   ├── macros/
+│   └── dbt_project.yml
+├── dags/osha_pipeline.py
+├── tests/
+└── docs/learning_notes.md
 ```
 
----
+The dbt directory/profile keeps its existing `osha_injury_ml` name for
+configuration compatibility. Its active scope is bronze sources and silver.
 
-## Learning Notes
+## Next decisions
 
-I am keeping a separate set of notes with concepts and decisions that I had to stop and think about while building the project.
+- Select an analytical consumer and define gold outputs from its requirements.
+- Decide whether source revisions require immutable snapshot history.
+- Define refresh frequency and operational monitoring.
+- Evaluate an API source if it adds value beyond the current downloadable snapshot.
 
-These are not intended to be a complete dbt or Machine Learning tutorial. They are mainly a record of what I learned while solving the actual problems in this repository.
-
-See:
-
-[`docs/learning_notes.md`](docs/learning_notes.md)
-
----
-
-## Why I Am Building This
-
-My professional background is mainly in Data and Analytics Engineering, while my academic background in Mathematics and Computational Engineering included Machine Learning, optimisation and numerical methods.
-
-I am building this project to connect those two areas: applying Data Engineering practices I have worked with professionally while developing stronger hands-on experience across the Machine Learning lifecycle.
-
----
-
-## Development Note
-
-I occasionally use AI tools for boilerplate, debugging and exploring implementation options, in the same way I use documentation and other development resources.
-
-The architecture, data validation, modelling decisions, experiments, interpretation and conclusions are developed and reviewed by me.
+Implementation decisions are recorded in
+[learning notes](docs/learning_notes.md).
